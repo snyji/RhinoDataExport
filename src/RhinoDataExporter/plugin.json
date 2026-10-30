@@ -1,0 +1,7 @@
+{
+    "name": "RhinoDataExporter",
+    "version": "1.0",
+    "description": "Starter plugin using the new EDMC plugin format.",
+    "load": "load.py",
+	"has_prefs": true
+}
