@@ -19,3 +19,4 @@ Licensed under [GNU].
 [EDMC]: https://github.com/EDCD/EDMarketConnector/wiki
 [EDRhinoSpotter]: https://github.com/Fumlop/EDRhinoSpotter
 [RhinoDataExporter]: https://github.com/snyji/RhinoDataExport
+[snyji]: https://github.com/snyji
