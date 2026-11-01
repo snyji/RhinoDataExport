@@ -1,7 +1,7 @@
 {
     "name": "RhinoDataExporter",
     "version": "1.0",
-    "description": "Starter plugin using the new EDMC plugin format.",
+    "description": "An EDMC plugin that exports the RhinoSpotter plugin's data to csv.",
     "load": "load.py",
 	"has_prefs": true
 }
