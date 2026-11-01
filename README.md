@@ -16,6 +16,11 @@ is useful for backing up the data as well as sharing it.
 
 Licensed under [GNU].
 
+## Requirements
+
+* [EDMC] version 6.1.2 and above (python 3.11)
+* [EDRhinoSpotter] 6.5.2 and above
+
 [EDMC]: https://github.com/EDCD/EDMarketConnector/wiki
 [EDRhinoSpotter]: https://github.com/Fumlop/EDRhinoSpotter
 [RhinoDataExporter]: https://github.com/snyji/RhinoDataExport
