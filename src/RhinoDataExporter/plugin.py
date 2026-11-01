@@ -5,10 +5,18 @@ from tkinter import filedialog
 from datetime import datetime
 
 class RhinoDataExporterPlugin:
+    """EDMC Plugin for exporting bookmarks from RhinoSpotter"""
+
     plugin_name = "RhinoDataExporter"
     plugin_version = "1.0"
 
     def __init__(self, plugin_dir):
+        """Register the plugin directory and RhinoSpotter database path
+
+        Args:
+            plugin_dir (string): plugin directory path
+            output_dir (string): output directory path
+        """
         self.plugin_dir = plugin_dir
         self.paths = {
             "db_path": "",
@@ -20,12 +28,17 @@ class RhinoDataExporterPlugin:
     # -----------------------------------------------------------------------
 
     def autodetect_db(self):
+        """Attempt to locate the RhinoSpotter database, defaults to
+        the default Windows location."""
         default = os.path.expanduser(r"~\AppData\Local\RhinoSpotter\db\rhinospotter.db")
+
         return default if os.path.isfile(default) else ""
 
     def ensure_export_dir(self):
+        """Ensure the exports directory exists"""
         export_dir = os.path.join(self.plugin_dir, "exports")
         os.makedirs(export_dir, exist_ok=True)
+
         return export_dir
 
     # -----------------------------------------------------------------------
@@ -33,6 +46,8 @@ class RhinoDataExporterPlugin:
     # -----------------------------------------------------------------------
 
     def export_bookmarks(self):
+        """Dump the database to a csv file."""
+        # Get the paths
         db_path = self.paths["db_path"]
         out_dir = self.paths["output_dir"]
 
@@ -48,12 +63,14 @@ class RhinoDataExporterPlugin:
         today = datetime.now().strftime("%Y-%m-%d")
         out_file = os.path.join(out_dir, f"RhinoExport_{today}.csv")
 
-        # RhinoSpotter export config (same as standalone script)
+        # RhinoSpotter csv header columns
         headers = [
             "System", "Body", "Location", "Coords",
             "Rigs", "Material", "A/D", "Cmdr", "ImportData"
         ]
 
+        # Field types allowed in the RhinoSpotter bookmark data used to
+        #   create the import.
         allowed_fields = {
             "system": (str,),
             "system_address": (int,),
@@ -73,6 +90,7 @@ class RhinoDataExporterPlugin:
 
         prefix = "RhinoData:"
 
+        # Attempt to gracefully handle imports
         try:
             import csv
             import sqlite3
@@ -80,22 +98,27 @@ class RhinoDataExporterPlugin:
             import zlib
             import base64
 
+            # Setup database connection
             conn = sqlite3.connect(db_path)
             conn.row_factory = sqlite3.Row
 
+            # Build the query
             stmt = """
                 SELECT *
                 FROM bookmarks
                 ORDER BY system, body_id, location_index
             """
 
+            # Get all rows
             rows = conn.execute(stmt)
 
+            # Write the CSV file
             with open(out_file, "w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=headers)
                 writer.writeheader()
-
+                # Loop through each row, write each row to the csv
                 for row in rows:
+                    # Read the stored json data
                     loc_data = json.loads(row["data"])
 
                     # Extract only allowed fields
@@ -105,6 +128,7 @@ class RhinoDataExporterPlugin:
                         if key in loc_data and loc_data[key] is not None
                     }
 
+                    # From https://github.com/Fumlop/EDRhinoSpotter/blob/main/rs_core/share.py
                     # Compress + encode
                     raw = json.dumps(
                         extracted,
@@ -202,16 +226,17 @@ class RhinoDataExporterPlugin:
 
         # Export button
         def do_export():
+            # Build the path
             today = datetime.now().strftime("%Y-%m-%d")
             expected_file = os.path.join(self.paths["output_dir"], f"RhinoExport_{today}.csv")
             existed_before = os.path.isfile(expected_file)
 
+            # Do th export
             result = self.export_bookmarks()
-
             if result:
                 parent_dir = os.path.basename(os.path.dirname(result))
                 file_name = os.path.basename(result)
-
+                # Indicate if written over existing
                 if existed_before:
                     status_var.set(f"Success! (overwritten) {parent_dir}/{file_name}")
                     status_label.config(fg="orange")
@@ -220,6 +245,7 @@ class RhinoDataExporterPlugin:
                     status_var.set(f"Success! {parent_dir}/{file_name}")
                     status_label.config(fg="green")
             else:
+                # Indicate failure
                 fail_name = f"RhinoExport_{today}.csv"
                 status_var.set(f"Failure! Failed to write export file: '{fail_name}'")
                 status_label.config(fg="red")
@@ -246,20 +272,25 @@ class RhinoDataExporterPlugin:
         return frame
 
     # -----------------------------------------------------------------------
-    # EDMC event hooks
+    # EDMC event hooks, future use?
     # -----------------------------------------------------------------------
 
     def stop(self):
-        print(f"[{self.plugin_name}] plugin_stop called")
+        # print(f"[{self.plugin_name}] plugin_stop called")
+        pass
 
     def prefs_changed(self):
-        print(f"[{self.plugin_name}] prefs_changed called")
+        # print(f"[{self.plugin_name}] prefs_changed called")
+        pass
 
     def journal_entry(self, cmdr, is_beta, system, station, entry, state_data):
-        print(f"[{self.plugin_name}] Journal event: {entry.get('event')}")
+        # print(f"[{self.plugin_name}] Journal event: {entry.get('event')}")
+        pass
 
     def cmdr_data(self, data, is_beta):
-        print(f"[{self.plugin_name}] Commander data received")
+        # print(f"[{self.plugin_name}] Commander data received")
+        pass
 
     def dashboard_entry(self, cmdr, is_beta, entry):
-        print(f"[{self.plugin_name}] Dashboard event: {entry.get('event')}")
+        # print(f"[{self.plugin_name}] Dashboard event: {entry.get('event')}")
+        pass
